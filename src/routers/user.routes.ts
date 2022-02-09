@@ -1,6 +1,6 @@
-import BaseRouter from "./BaseRoutes";
-import UserController from "../controllers/UserController";
-import { auth } from "../middleware/AuthMiddleware";
+import BaseRouter from "./base.routes";
+import UserController from "../controllers/user.controller";
+import { auth } from "../middleware/auth.middleware";
 
 class UserRoutes extends BaseRouter {
   public routes(): void {

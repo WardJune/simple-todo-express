@@ -1,49 +1,63 @@
-import express, { Application, Response, Request } from "express";
-import bodyParser from "body-parser";
+import express, { Application } from "express";
+import mongoose, { ConnectOptions } from "mongoose";
+import { urlencoded, json } from "body-parser";
+import { config } from "./config/app.config";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 
 //? router
-import UserRoutes from "./routers/UserRoutes";
-import AuthRoutes from "./routers/AuthRoutes";
+import UserRoutes from "./routers/user.routes";
+import AuthRoutes from "./routers/auth.routes";
+import TodoRoutes from "./routers/todo.routes";
 
 class App {
   public app: Application;
+  public mongoUri: string = `mongodb://${config.db.host}:${config.db.port}/${config.db.name}`;
   constructor() {
     this.app = express();
+    this.mongoSetup();
     this.config();
     this.route();
   }
 
-  //* config
+  //! config
   private config(): void {
     this.app.use(morgan("dev"));
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({ extended: false }));
+    this.app.use(json());
+    this.app.use(urlencoded({ extended: false }));
     this.app.use(helmet());
     this.app.use(cors());
     this.app.use(compression());
   }
 
-  //* route
-  protected route(): void {
-    this.app.get("/", (req: Request, res: Response) => {
-      res.status(200).json({
-        success: true,
-        successCode: 200,
-        responseStatus: "OK",
+  //! mongo
+  private mongoSetup(): void {
+    const options = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    };
+    mongoose
+      .connect(this.mongoUri, options as ConnectOptions)
+      .then(() => {
+        console.log("database connected");
+      })
+      .catch((error) => {
+        console.log("database connection failed");
       });
-    });
+  }
 
+  //! route
+  protected route(): void {
     this.app.use("/api/v1/users", UserRoutes);
     this.app.use("/api/v1/auth", AuthRoutes);
+    this.app.use("/api/v1/todo", TodoRoutes);
   }
 }
 
 const app = new App().app;
 
-app.listen(8080, () => {
-  console.log("server running on port 8080");
+app.listen(process.env.PORT, () => {
+  console.log(`server running on port ${config.db.host}:${config.app.port}`);
 });
