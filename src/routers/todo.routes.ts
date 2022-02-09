@@ -1,6 +1,6 @@
 import BaseRouter from "./base.routes";
 import TodoController from "../controllers/todo.controller";
-import { auth } from "../middleware/auth.middleware";
+import { auth, isAllowed } from "../middleware/auth.middleware";
 import validate from "../middleware/todo.validator";
 
 class TodoRoute extends BaseRouter {
@@ -8,8 +8,8 @@ class TodoRoute extends BaseRouter {
     this.router.get("/", auth, TodoController.index);
     this.router.get("/:id", auth, TodoController.show);
     this.router.post("/", auth, validate, TodoController.store);
-    this.router.patch("/:id", auth, validate, TodoController.update);
-    this.router.delete("/:id", auth, TodoController.delete);
+    this.router.patch("/:id", auth, validate, isAllowed, TodoController.update);
+    this.router.delete("/:id", auth, isAllowed, TodoController.delete);
   }
 }
 
